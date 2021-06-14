@@ -58,8 +58,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define REL_NC_p5_6_Pin GPIO_PIN_0
-#define REL_NC_p5_6_GPIO_Port GPIOA
+#define DEC0_NC_P7_17_Pin GPIO_PIN_0
+#define DEC0_NC_P7_17_GPIO_Port GPIOA
 #define DEK1_NO_p7_8_Pin GPIO_PIN_1
 #define DEK1_NO_p7_8_GPIO_Port GPIOA
 #define VCP_TX_Pin GPIO_PIN_2
@@ -74,12 +74,12 @@ void Error_Handler(void);
 #define DEK5_NO_p7_12_GPIO_Port GPIOA
 #define DEK6_NO_p7_13_Pin GPIO_PIN_7
 #define DEK6_NO_p7_13_GPIO_Port GPIOA
-#define DEC_manual_Pin GPIO_PIN_8
-#define DEC_manual_GPIO_Port GPIOA
-#define DEC_pulse_inp_p1_Pin GPIO_PIN_9
-#define DEC_pulse_inp_p1_GPIO_Port GPIOA
-#define DEC_reset_Pin GPIO_PIN_10
-#define DEC_reset_GPIO_Port GPIOA
+#define DEK_manual_Pin GPIO_PIN_8
+#define DEK_manual_GPIO_Port GPIOA
+#define DEK_pulse_inp_p1_Pin GPIO_PIN_9
+#define DEK_pulse_inp_p1_GPIO_Port GPIOA
+#define DEK_reset_Pin GPIO_PIN_10
+#define DEK_reset_GPIO_Port GPIOA
 #define SWDIO_Pin GPIO_PIN_13
 #define SWDIO_GPIO_Port GPIOA
 #define SWCLK_Pin GPIO_PIN_14
@@ -88,8 +88,8 @@ void Error_Handler(void);
 #define VCP_RX_GPIO_Port GPIOA
 #define LD3_Pin GPIO_PIN_3
 #define LD3_GPIO_Port GPIOB
-#define DEK0_NC_p7_17_Pin GPIO_PIN_4
-#define DEK0_NC_p7_17_GPIO_Port GPIOB
+#define REL_NC_p5_6_Pin GPIO_PIN_4
+#define REL_NC_p5_6_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

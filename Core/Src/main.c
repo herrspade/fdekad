@@ -1,21 +1,21 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the
-  * License. You may obtain a copy of the License at:
-  *                        opensource.org/licenses/BSD-3-Clause
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
+ * All rights reserved.</center></h2>
+ *
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -23,7 +23,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "stdbool.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -93,19 +93,19 @@ int main(void)
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
-  /* add mutexes, ... */
+    /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
-  /* add semaphores, ... */
+    /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
-  /* start timers, add new ones, ... */
+    /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
-  /* add queues, ... */
+    /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -114,7 +114,7 @@ int main(void)
   fdekadTaskHandle = osThreadCreate(osThread(fdekadTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
+    /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
   /* Start scheduler */
@@ -123,12 +123,11 @@ int main(void)
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
+    while (1) {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+    }
   /* USER CODE END 3 */
 }
 
@@ -195,15 +194,15 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, REL_NC_p5_6_Pin|DEK1_NO_p7_8_Pin|DEK2_NO_p7_9_Pin|DEK3_NO_p7_10_Pin
+  HAL_GPIO_WritePin(GPIOA, DEC0_NC_P7_17_Pin|DEK1_NO_p7_8_Pin|DEK2_NO_p7_9_Pin|DEK3_NO_p7_10_Pin
                           |DEK4_NO_p7_11_Pin|DEK5_NO_p7_12_Pin|DEK6_NO_p7_13_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LD3_Pin|DEK0_NC_p7_17_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, LD3_Pin|REL_NC_p5_6_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : REL_NC_p5_6_Pin DEK1_NO_p7_8_Pin DEK2_NO_p7_9_Pin DEK3_NO_p7_10_Pin
+  /*Configure GPIO pins : DEC0_NC_P7_17_Pin DEK1_NO_p7_8_Pin DEK2_NO_p7_9_Pin DEK3_NO_p7_10_Pin
                            DEK4_NO_p7_11_Pin DEK5_NO_p7_12_Pin DEK6_NO_p7_13_Pin */
-  GPIO_InitStruct.Pin = REL_NC_p5_6_Pin|DEK1_NO_p7_8_Pin|DEK2_NO_p7_9_Pin|DEK3_NO_p7_10_Pin
+  GPIO_InitStruct.Pin = DEC0_NC_P7_17_Pin|DEK1_NO_p7_8_Pin|DEK2_NO_p7_9_Pin|DEK3_NO_p7_10_Pin
                           |DEK4_NO_p7_11_Pin|DEK5_NO_p7_12_Pin|DEK6_NO_p7_13_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -218,10 +217,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
   HAL_GPIO_Init(VCP_TX_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : DEC_manual_Pin DEC_pulse_inp_p1_Pin DEC_reset_Pin */
-  GPIO_InitStruct.Pin = DEC_manual_Pin|DEC_pulse_inp_p1_Pin|DEC_reset_Pin;
+  /*Configure GPIO pins : DEK_manual_Pin DEK_pulse_inp_p1_Pin DEK_reset_Pin */
+  GPIO_InitStruct.Pin = DEK_manual_Pin|DEK_pulse_inp_p1_Pin|DEK_reset_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : VCP_RX_Pin */
@@ -232,8 +231,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF3_USART2;
   HAL_GPIO_Init(VCP_RX_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LD3_Pin DEK0_NC_p7_17_Pin */
-  GPIO_InitStruct.Pin = LD3_Pin|DEK0_NC_p7_17_Pin;
+  /*Configure GPIO pins : LD3_Pin REL_NC_p5_6_Pin */
+  GPIO_InitStruct.Pin = LD3_Pin|REL_NC_p5_6_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -243,23 +242,200 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+typedef enum {
+    DEK1,
+    DEK2,
+    DEK3,
+    DEK4,
+    DEK5,
+    DEK6,
+    DEK7,
+    DEK8,
+    DEK9,
+    DEK0,
+    DEK_END,
+} OutputState_e;
+
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
 /**
-  * @brief  Function implementing the fdekadTask thread.
-  * @param  argument: Not used
-  * @retval None
-  */
+ * @brief  Function implementing the fdekadTask thread.
+ * @param  argument: Not used
+ * @retval None
+ */
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void const * argument)
 {
   /* USER CODE BEGIN 5 */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+	TickType_t ticks_toggle = xTaskGetTickCount();
+
+    uint32_t curr_pin_state = DEK_manual_Pin | DEK_pulse_inp_p1_Pin | DEK_reset_Pin;
+    uint32_t prev_pin_state = DEK_manual_Pin | DEK_pulse_inp_p1_Pin | DEK_reset_Pin;
+    uint32_t changed_pins   = 0;
+
+    bool manual_pressed    = false;
+    bool manual_changed    = false;
+    bool pulse_inp_high    = false;
+    bool pulse_inp_changed = false;
+    bool reset_pressed     = false;
+    bool reset_changed     = false;
+
+    OutputState_e output_state = DEK0;
+    /* Infinite loop */
+    for (;;) {
+        // Reset changed flags
+        manual_changed    = false;
+        pulse_inp_changed = false;
+        reset_changed     = false;
+        // Read and handle input pins
+        prev_pin_state = curr_pin_state & (DEK_manual_Pin | DEK_pulse_inp_p1_Pin | DEK_reset_Pin);
+        curr_pin_state = GPIOA->IDR & (DEK_manual_Pin | DEK_pulse_inp_p1_Pin | DEK_reset_Pin);
+        changed_pins   = curr_pin_state ^ prev_pin_state;
+        if (changed_pins) {
+            // De-bounce
+            osDelay(20);
+            uint32_t tmp_pin_state = GPIOA->IDR & (DEK_manual_Pin | DEK_pulse_inp_p1_Pin | DEK_reset_Pin);
+            if (curr_pin_state == tmp_pin_state) {
+                // some pin has changed!
+                if (changed_pins & DEK_manual_Pin) {
+                    manual_changed = true;
+                    if (curr_pin_state & DEK_manual_Pin) {
+                        // low when pressed...
+                        manual_pressed = false;
+                    } else {
+                        manual_pressed = true;
+                    }
+                }
+                if (changed_pins & DEK_pulse_inp_p1_Pin) {
+                    pulse_inp_changed = true;
+                    if (curr_pin_state & DEK_pulse_inp_p1_Pin) {
+                        pulse_inp_high = true;
+                    } else {
+                        pulse_inp_high = false;
+                    }
+                }
+                if (changed_pins & DEK_reset_Pin) {
+                    reset_changed = true;
+                    if (curr_pin_state & DEK_reset_Pin) {
+                        // low when pressed...
+                        reset_pressed = false;
+                    } else {
+                        reset_pressed = true;
+                    }
+                }
+            }
+        }
+        // Check for positive flank on pulse and manual inputs...
+        if ((manual_changed && manual_pressed) || (pulse_inp_changed && pulse_inp_high)) {
+            // open REL_NC_p5_6_Pin
+            HAL_GPIO_WritePin(REL_NC_p5_6_GPIO_Port, REL_NC_p5_6_Pin, GPIO_PIN_SET);
+            // Next state
+            output_state += 1;
+        }
+        // Check for negative flank on pulse and manual inputs...
+        if ((manual_changed && !manual_pressed) || (pulse_inp_changed && !pulse_inp_high)) {
+            // close REL_NC_p5_6_Pin
+            HAL_GPIO_WritePin(REL_NC_p5_6_GPIO_Port, REL_NC_p5_6_Pin, GPIO_PIN_RESET);
+        }
+
+        // Check for negative flank on pulse and manual inputs...
+        if (reset_changed && reset_pressed) {
+            // close REL_NC_p5_6_Pin
+            output_state = DEK0;
+        }
+        // Check for output state overflow
+        if (output_state >= DEK_END) {
+            output_state = DEK1;
+        }
+
+        switch (output_state) {
+        case DEK1:
+            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
+                              DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin | DEK4_NO_p7_11_Pin | DEK5_NO_p7_12_Pin |
+                                  DEK6_NO_p7_13_Pin,
+                              GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEC0_NC_P7_17_Pin, GPIO_PIN_SET);
+            osDelay(10);
+            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEK1_NO_p7_8_Pin, GPIO_PIN_SET);
+            break;
+        case DEK2:
+            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
+                              DEK1_NO_p7_8_Pin | DEK3_NO_p7_10_Pin | DEK4_NO_p7_11_Pin | DEK5_NO_p7_12_Pin |
+                                  DEK6_NO_p7_13_Pin,
+                              GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEC0_NC_P7_17_Pin, GPIO_PIN_SET);
+            osDelay(10);
+            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEK2_NO_p7_9_Pin, GPIO_PIN_SET);
+            break;
+        case DEK3:
+            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
+                              DEK1_NO_p7_8_Pin | DEK2_NO_p7_9_Pin | DEK4_NO_p7_11_Pin | DEK5_NO_p7_12_Pin |
+                                  DEK6_NO_p7_13_Pin,
+                              GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEC0_NC_P7_17_Pin, GPIO_PIN_SET);
+            osDelay(10);
+            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEK3_NO_p7_10_Pin, GPIO_PIN_SET);
+            break;
+        case DEK4:
+            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
+                              DEK1_NO_p7_8_Pin | DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin | DEK5_NO_p7_12_Pin |
+                                  DEK6_NO_p7_13_Pin,
+                              GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEC0_NC_P7_17_Pin, GPIO_PIN_SET);
+            osDelay(10);
+            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEK4_NO_p7_11_Pin, GPIO_PIN_SET);
+            break;
+        case DEK5:
+            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
+                              DEK1_NO_p7_8_Pin | DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin | DEK4_NO_p7_11_Pin |
+                                  DEK6_NO_p7_13_Pin,
+                              GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEC0_NC_P7_17_Pin, GPIO_PIN_SET);
+            osDelay(10);
+            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEK5_NO_p7_12_Pin, GPIO_PIN_SET);
+            break;
+        case DEK6:
+            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
+                              DEK1_NO_p7_8_Pin | DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin | DEK4_NO_p7_11_Pin |
+                                  DEK5_NO_p7_12_Pin,
+                              GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEC0_NC_P7_17_Pin, GPIO_PIN_SET);
+            osDelay(10);
+            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEK6_NO_p7_13_Pin, GPIO_PIN_SET);
+            break;
+        case DEK7:
+            // Intentional fallthrough
+        case DEK8:
+            // Intentional fallthrough
+        case DEK9:
+            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
+                              DEK1_NO_p7_8_Pin | DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin | DEK4_NO_p7_11_Pin |
+                                  DEK5_NO_p7_12_Pin | DEK6_NO_p7_13_Pin,
+                              GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEC0_NC_P7_17_Pin, GPIO_PIN_SET);
+            osDelay(10);
+            break;
+        case DEK0:
+            // Intentional fallthrough
+        default:
+            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
+                              DEC0_NC_P7_17_Pin | DEK1_NO_p7_8_Pin | DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin |
+                                  DEK4_NO_p7_11_Pin | DEK5_NO_p7_12_Pin | DEK6_NO_p7_13_Pin,
+                              GPIO_PIN_RESET);
+            osDelay(10);
+            break;
+        }
+        osDelay(10);
+
+        TickType_t ticks_now = xTaskGetTickCount() ;
+        TickType_t elapsed = ticks_now - ticks_toggle;  // elapsed: duration
+         if (elapsed >= 5000)   {
+        	 ticks_toggle = ticks_now ;
+        	 HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+
+         }
+    }
   /* USER CODE END 5 */
 }
 
@@ -291,11 +467,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
-  while (1)
-  {
-  }
+    /* User can add his own implementation to report the HAL error return state */
+    __disable_irq();
+    while (1) {}
   /* USER CODE END Error_Handler_Debug */
 }
 
@@ -310,8 +484,8 @@ void Error_Handler(void)
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+    /* User can add his own implementation to report the file name and line number,
+       ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
