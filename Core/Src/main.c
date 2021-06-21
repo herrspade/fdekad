@@ -328,16 +328,16 @@ void StartDefaultTask(void const * argument)
         }
         // Check for positive flank on pulse and manual inputs...
         if ((manual_changed && manual_pressed) || (pulse_inp_changed && pulse_inp_high)) {
-            // open REL_NC_p5_6_Pin
-            HAL_GPIO_WritePin(REL_NC_p5_6_GPIO_Port, REL_NC_p5_6_Pin, GPIO_PIN_SET);
+//            // open REL_NC_p5_6_Pin
+//            HAL_GPIO_WritePin(REL_NC_p5_6_GPIO_Port, REL_NC_p5_6_Pin, GPIO_PIN_SET);
             // Next state
             output_state += 1;
         }
         // Check for negative flank on pulse and manual inputs...
-        if ((manual_changed && !manual_pressed) || (pulse_inp_changed && !pulse_inp_high)) {
-            // close REL_NC_p5_6_Pin
-            HAL_GPIO_WritePin(REL_NC_p5_6_GPIO_Port, REL_NC_p5_6_Pin, GPIO_PIN_RESET);
-        }
+//        if ((manual_changed && !manual_pressed) || (pulse_inp_changed && !pulse_inp_high)) {
+//            // close REL_NC_p5_6_Pin
+//            HAL_GPIO_WritePin(REL_NC_p5_6_GPIO_Port, REL_NC_p5_6_Pin, GPIO_PIN_RESET);
+//        }
 
         // Check for negative flank on pulse and manual inputs...
         if (reset_changed && reset_pressed) {
@@ -351,7 +351,8 @@ void StartDefaultTask(void const * argument)
 
         switch (output_state) {
         case DEK1:
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
+            HAL_GPIO_WritePin(REL_NC_p5_6_GPIO_Port, REL_NC_p5_6_Pin, GPIO_PIN_SET);
+        	HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
                               DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin | DEK4_NO_p7_11_Pin | DEK5_NO_p7_12_Pin |
                                   DEK6_NO_p7_13_Pin,
                               GPIO_PIN_RESET);
@@ -360,7 +361,8 @@ void StartDefaultTask(void const * argument)
             HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEK1_NO_p7_8_Pin, GPIO_PIN_SET);
             break;
         case DEK2:
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
+            HAL_GPIO_WritePin(REL_NC_p5_6_GPIO_Port, REL_NC_p5_6_Pin, GPIO_PIN_SET);
+        	HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
                               DEK1_NO_p7_8_Pin | DEK3_NO_p7_10_Pin | DEK4_NO_p7_11_Pin | DEK5_NO_p7_12_Pin |
                                   DEK6_NO_p7_13_Pin,
                               GPIO_PIN_RESET);
@@ -369,7 +371,8 @@ void StartDefaultTask(void const * argument)
             HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEK2_NO_p7_9_Pin, GPIO_PIN_SET);
             break;
         case DEK3:
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
+            HAL_GPIO_WritePin(REL_NC_p5_6_GPIO_Port, REL_NC_p5_6_Pin, GPIO_PIN_SET);
+        	HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
                               DEK1_NO_p7_8_Pin | DEK2_NO_p7_9_Pin | DEK4_NO_p7_11_Pin | DEK5_NO_p7_12_Pin |
                                   DEK6_NO_p7_13_Pin,
                               GPIO_PIN_RESET);
@@ -378,6 +381,7 @@ void StartDefaultTask(void const * argument)
             HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEK3_NO_p7_10_Pin, GPIO_PIN_SET);
             break;
         case DEK4:
+            HAL_GPIO_WritePin(REL_NC_p5_6_GPIO_Port, REL_NC_p5_6_Pin, GPIO_PIN_SET);
             HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
                               DEK1_NO_p7_8_Pin | DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin | DEK5_NO_p7_12_Pin |
                                   DEK6_NO_p7_13_Pin,
@@ -387,6 +391,7 @@ void StartDefaultTask(void const * argument)
             HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEK4_NO_p7_11_Pin, GPIO_PIN_SET);
             break;
         case DEK5:
+            HAL_GPIO_WritePin(REL_NC_p5_6_GPIO_Port, REL_NC_p5_6_Pin, GPIO_PIN_SET);
             HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
                               DEK1_NO_p7_8_Pin | DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin | DEK4_NO_p7_11_Pin |
                                   DEK6_NO_p7_13_Pin,
@@ -396,6 +401,7 @@ void StartDefaultTask(void const * argument)
             HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEK5_NO_p7_12_Pin, GPIO_PIN_SET);
             break;
         case DEK6:
+            HAL_GPIO_WritePin(REL_NC_p5_6_GPIO_Port, REL_NC_p5_6_Pin, GPIO_PIN_SET);
             HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
                               DEK1_NO_p7_8_Pin | DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin | DEK4_NO_p7_11_Pin |
                                   DEK5_NO_p7_12_Pin,
@@ -409,6 +415,7 @@ void StartDefaultTask(void const * argument)
         case DEK8:
             // Intentional fallthrough
         case DEK9:
+            HAL_GPIO_WritePin(REL_NC_p5_6_GPIO_Port, REL_NC_p5_6_Pin, GPIO_PIN_SET);
             HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
                               DEK1_NO_p7_8_Pin | DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin | DEK4_NO_p7_11_Pin |
                                   DEK5_NO_p7_12_Pin | DEK6_NO_p7_13_Pin,
@@ -419,6 +426,7 @@ void StartDefaultTask(void const * argument)
         case DEK0:
             // Intentional fallthrough
         default:
+            HAL_GPIO_WritePin(REL_NC_p5_6_GPIO_Port, REL_NC_p5_6_Pin, GPIO_PIN_RESET);
             HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
                               DEC0_NC_P7_17_Pin | DEK1_NO_p7_8_Pin | DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin |
                                   DEK4_NO_p7_11_Pin | DEK5_NO_p7_12_Pin | DEK6_NO_p7_13_Pin,
