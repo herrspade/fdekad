@@ -315,6 +315,7 @@ void StartDefaultTask(void const* argument)
             osDelay(100);
             uint32_t tmp_pin_state = GPIOA->IDR & (DEK_manual_Pin | DEK_pulse_inp_p1_Pin | DEK_reset_Pin);
             if (curr_pin_state == tmp_pin_state) {
+            	prev_pin_state = curr_pin_state & (DEK_manual_Pin | DEK_pulse_inp_p1_Pin | DEK_reset_Pin);
                 // some pin has changed!
                 if (changed_pins & DEK_manual_Pin) {
                     manual_changed = true;
