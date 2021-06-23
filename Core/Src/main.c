@@ -268,7 +268,7 @@ void StartDefaultTask(void const* argument)
     /* USER CODE BEGIN 5 */
 // #define SHOW_STATE
 #define LED_TOGGLE_TICKS 5000
-#define PULSE_HIGH_DEKAD_RESET_TICKS 1000
+#define PULSE_HIGH_DEKAD_RESET_TICKS 3000
 
     TickType_t ticks_toggle    = xTaskGetTickCount();
     TickType_t tick_pulse_high = ticks_toggle;
@@ -300,7 +300,7 @@ void StartDefaultTask(void const* argument)
                 osDelay(150);
             }
 #else
-            HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+            //           HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
 #endif
         }
         // Reset changed flags
@@ -308,12 +308,11 @@ void StartDefaultTask(void const* argument)
         pulse_inp_changed = false;
         reset_changed     = false;
         // Read and handle input pins
-        prev_pin_state = curr_pin_state & (DEK_manual_Pin | DEK_pulse_inp_p1_Pin | DEK_reset_Pin);
         curr_pin_state = GPIOA->IDR & (DEK_manual_Pin | DEK_pulse_inp_p1_Pin | DEK_reset_Pin);
         changed_pins   = curr_pin_state ^ prev_pin_state;
         if (changed_pins) {
             // De-bounce
-            osDelay(20);
+            osDelay(100);
             uint32_t tmp_pin_state = GPIOA->IDR & (DEK_manual_Pin | DEK_pulse_inp_p1_Pin | DEK_reset_Pin);
             if (curr_pin_state == tmp_pin_state) {
                 // some pin has changed!
@@ -352,7 +351,8 @@ void StartDefaultTask(void const* argument)
             // Next state
             output_state += 1;
             // Show the change
-            HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+            HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
+            // HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
         }
         // Check if impulse or manual has been held/pressed
         if ((!manual_changed && manual_pressed) || (!pulse_inp_changed && pulse_inp_high)) {
@@ -367,6 +367,7 @@ void StartDefaultTask(void const* argument)
         // Check for negative flank on pulse and manual inputs...
         if ((manual_changed && !manual_pressed) || (pulse_inp_changed && !pulse_inp_high)) {
             // nothing here
+            HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
         }
 
         // Check for negative flank on pulse and manual inputs...
