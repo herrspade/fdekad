@@ -191,16 +191,16 @@ static void MX_GPIO_Init(void)
 
     /*Configure GPIO pin Output Level */
     HAL_GPIO_WritePin(GPIOA,
-                      DEC0_NC_P7_17_Pin | DEK1_NO_p7_8_Pin | DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin | DEK4_NO_p7_11_Pin |
+                      DEK0_NC_P7_17_Pin | DEK1_NO_p7_8_Pin | DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin | DEK4_NO_p7_11_Pin |
                           DEK5_NO_p7_12_Pin | DEK6_NO_p7_13_Pin,
                       GPIO_PIN_RESET);
 
     /*Configure GPIO pin Output Level */
-    HAL_GPIO_WritePin(GPIOB, LD3_Pin | REL_NC_p5_6_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(GPIOB, LD3_Pin | REL_NO_DEK0_p5_6_Pin, GPIO_PIN_RESET);
 
-    /*Configure GPIO pins : DEC0_NC_P7_17_Pin DEK1_NO_p7_8_Pin DEK2_NO_p7_9_Pin DEK3_NO_p7_10_Pin
+    /*Configure GPIO pins : DEK0_NC_P7_17_Pin DEK1_NO_p7_8_Pin DEK2_NO_p7_9_Pin DEK3_NO_p7_10_Pin
                              DEK4_NO_p7_11_Pin DEK5_NO_p7_12_Pin DEK6_NO_p7_13_Pin */
-    GPIO_InitStruct.Pin = DEC0_NC_P7_17_Pin | DEK1_NO_p7_8_Pin | DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin |
+    GPIO_InitStruct.Pin = DEK0_NC_P7_17_Pin | DEK1_NO_p7_8_Pin | DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin |
                           DEK4_NO_p7_11_Pin | DEK5_NO_p7_12_Pin | DEK6_NO_p7_13_Pin;
     GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull  = GPIO_NOPULL;
@@ -215,11 +215,17 @@ static void MX_GPIO_Init(void)
     GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
     HAL_GPIO_Init(VCP_TX_GPIO_Port, &GPIO_InitStruct);
 
-    /*Configure GPIO pins : DEK_manual_Pin DEK_pulse_inp_p1_Pin DEK_reset_Pin */
-    GPIO_InitStruct.Pin  = DEK_manual_Pin | DEK_pulse_inp_p1_Pin | DEK_reset_Pin;
+    /*Configure GPIO pins : DEK_manual_Pin DEK_pulse_inp_p1_Pin DEK_reset_sw_Pin */
+    GPIO_InitStruct.Pin  = DEK_manual_Pin | DEK_pulse_inp_p1_Pin | DEK_reset_sw_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
     GPIO_InitStruct.Pull = GPIO_PULLUP;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+    /*Configure GPIO pin : DEK_reset_input_Pin */
+    GPIO_InitStruct.Pin  = DEK_reset_input_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(DEK_reset_input_GPIO_Port, &GPIO_InitStruct);
 
     /*Configure GPIO pin : VCP_RX_Pin */
     GPIO_InitStruct.Pin       = VCP_RX_Pin;
@@ -229,8 +235,8 @@ static void MX_GPIO_Init(void)
     GPIO_InitStruct.Alternate = GPIO_AF3_USART2;
     HAL_GPIO_Init(VCP_RX_GPIO_Port, &GPIO_InitStruct);
 
-    /*Configure GPIO pins : LD3_Pin REL_NC_p5_6_Pin */
-    GPIO_InitStruct.Pin   = LD3_Pin | REL_NC_p5_6_Pin;
+    /*Configure GPIO pins : LD3_Pin REL_NO_DEK0_p5_6_Pin */
+    GPIO_InitStruct.Pin   = LD3_Pin | REL_NO_DEK0_p5_6_Pin;
     GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull  = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -238,6 +244,8 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+#define SWITCH_AND_INPUT_PINS (DEK_manual_Pin | DEK_pulse_inp_p1_Pin | DEK_reset_sw_Pin | DEK_reset_input_Pin)
 
 /// Dekade states
 typedef enum {
@@ -270,19 +278,20 @@ void StartDefaultTask(void const* argument)
 #define LED_TOGGLE_TICKS 5000
 #define PULSE_HIGH_DEKAD_RESET_TICKS 3000
 
-    TickType_t ticks_toggle    = xTaskGetTickCount();
-    TickType_t tick_pulse_high = ticks_toggle;
+    TickType_t ticks_toggle = xTaskGetTickCount();
 
-    uint32_t curr_pin_state = DEK_manual_Pin | DEK_pulse_inp_p1_Pin | DEK_reset_Pin;
-    uint32_t prev_pin_state = DEK_manual_Pin | DEK_pulse_inp_p1_Pin | DEK_reset_Pin;
+    uint32_t curr_pin_state = SWITCH_AND_INPUT_PINS;
+    uint32_t prev_pin_state = SWITCH_AND_INPUT_PINS;
     uint32_t changed_pins   = 0;
 
     bool manual_pressed    = false;
     bool manual_changed    = false;
     bool pulse_inp_high    = false;
     bool pulse_inp_changed = false;
-    bool reset_pressed     = false;
-    bool reset_changed     = false;
+    bool reset_sw_pressed  = false;
+    bool reset_sw_changed  = false;
+    bool reset_inp_high    = false;
+    bool reset_inp_changed = false;
 
     OutputState_e output_state = DEK0;
     /* Infinite loop */
@@ -306,16 +315,17 @@ void StartDefaultTask(void const* argument)
         // Reset changed flags
         manual_changed    = false;
         pulse_inp_changed = false;
-        reset_changed     = false;
+        reset_sw_changed  = false;
+        reset_inp_changed = false;
         // Read and handle input pins
-        curr_pin_state = GPIOA->IDR & (DEK_manual_Pin | DEK_pulse_inp_p1_Pin | DEK_reset_Pin);
+        curr_pin_state = GPIOA->IDR & SWITCH_AND_INPUT_PINS;
         changed_pins   = curr_pin_state ^ prev_pin_state;
         if (changed_pins) {
             // De-bounce
             osDelay(100);
-            uint32_t tmp_pin_state = GPIOA->IDR & (DEK_manual_Pin | DEK_pulse_inp_p1_Pin | DEK_reset_Pin);
+            uint32_t tmp_pin_state = GPIOA->IDR & SWITCH_AND_INPUT_PINS;
             if (curr_pin_state == tmp_pin_state) {
-            	prev_pin_state = curr_pin_state & (DEK_manual_Pin | DEK_pulse_inp_p1_Pin | DEK_reset_Pin);
+                prev_pin_state = curr_pin_state & SWITCH_AND_INPUT_PINS;
                 // some pin has changed!
                 if (changed_pins & DEK_manual_Pin) {
                     manual_changed = true;
@@ -334,21 +344,28 @@ void StartDefaultTask(void const* argument)
                         pulse_inp_high = false;
                     }
                 }
-                if (changed_pins & DEK_reset_Pin) {
-                    reset_changed = true;
-                    if (curr_pin_state & DEK_reset_Pin) {
+                if (changed_pins & DEK_reset_sw_Pin) {
+                    reset_sw_changed = true;
+                    if (curr_pin_state & DEK_reset_sw_Pin) {
                         // low when pressed...
-                        reset_pressed = false;
+                        reset_sw_pressed = false;
                     } else {
-                        reset_pressed = true;
+                        reset_sw_pressed = true;
+                    }
+                    if (changed_pins & DEK_reset_input_Pin) {
+                        reset_inp_changed = true;
+                        if (curr_pin_state & DEK_reset_input_Pin) {
+                            // low when pressed...
+                            reset_inp_high = false;
+                        } else {
+                            reset_inp_high = true;
+                        }
                     }
                 }
             }
         }
         // Check for positive flank on pulse and manual inputs...
         if ((manual_changed && manual_pressed) || (pulse_inp_changed && pulse_inp_high)) {
-            // remember the time
-            tick_pulse_high = xTaskGetTickCount();
             // Next state
             output_state += 1;
             // Show the change
@@ -357,13 +374,7 @@ void StartDefaultTask(void const* argument)
         }
         // Check if impulse or manual has been held/pressed
         if ((!manual_changed && manual_pressed) || (!pulse_inp_changed && pulse_inp_high)) {
-            // calculate pressed time
-            TickType_t pressed = ticks_now - tick_pulse_high; // pressed: duration
-            if (pressed >= PULSE_HIGH_DEKAD_RESET_TICKS) {
-                tick_pulse_high = ticks_now;
-                // Reset dekad
-                output_state = DEK0;
-            }
+            // nothing here
         }
         // Check for negative flank on pulse and manual inputs...
         if ((manual_changed && !manual_pressed) || (pulse_inp_changed && !pulse_inp_high)) {
@@ -372,7 +383,7 @@ void StartDefaultTask(void const* argument)
         }
 
         // Check for negative flank on pulse and manual inputs...
-        if (reset_changed && reset_pressed) {
+        if ((reset_sw_changed && reset_sw_pressed) || (reset_inp_changed && reset_inp_high)) {
             // close REL_NC_p5_6_Pin
             output_state = DEK0;
         }
@@ -383,84 +394,84 @@ void StartDefaultTask(void const* argument)
 
         switch (output_state) {
         case DEK1:
-            HAL_GPIO_WritePin(REL_NC_p5_6_GPIO_Port, REL_NC_p5_6_Pin, GPIO_PIN_SET);
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
+            HAL_GPIO_WritePin(REL_NO_DEK0_p5_6_GPIO_Port, REL_NO_DEK0_p5_6_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(DEK0_NC_P7_17_GPIO_Port,
                               DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin | DEK4_NO_p7_11_Pin | DEK5_NO_p7_12_Pin |
                                   DEK6_NO_p7_13_Pin,
                               GPIO_PIN_RESET);
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEC0_NC_P7_17_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(REL_NO_DEK0_p5_6_GPIO_Port, DEK0_NC_P7_17_Pin, GPIO_PIN_SET);
             osDelay(10);
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEK1_NO_p7_8_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(DEK0_NC_P7_17_GPIO_Port, DEK1_NO_p7_8_Pin, GPIO_PIN_SET);
             break;
         case DEK2:
-            HAL_GPIO_WritePin(REL_NC_p5_6_GPIO_Port, REL_NC_p5_6_Pin, GPIO_PIN_SET);
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
+            HAL_GPIO_WritePin(REL_NO_DEK0_p5_6_GPIO_Port, REL_NO_DEK0_p5_6_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(DEK0_NC_P7_17_GPIO_Port,
                               DEK1_NO_p7_8_Pin | DEK3_NO_p7_10_Pin | DEK4_NO_p7_11_Pin | DEK5_NO_p7_12_Pin |
                                   DEK6_NO_p7_13_Pin,
                               GPIO_PIN_RESET);
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEC0_NC_P7_17_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(DEK0_NC_P7_17_GPIO_Port, DEK0_NC_P7_17_Pin, GPIO_PIN_SET);
             osDelay(10);
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEK2_NO_p7_9_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(DEK0_NC_P7_17_GPIO_Port, DEK2_NO_p7_9_Pin, GPIO_PIN_SET);
             break;
         case DEK3:
-            HAL_GPIO_WritePin(REL_NC_p5_6_GPIO_Port, REL_NC_p5_6_Pin, GPIO_PIN_SET);
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
+            HAL_GPIO_WritePin(REL_NO_DEK0_p5_6_GPIO_Port, REL_NO_DEK0_p5_6_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(DEK0_NC_P7_17_GPIO_Port,
                               DEK1_NO_p7_8_Pin | DEK2_NO_p7_9_Pin | DEK4_NO_p7_11_Pin | DEK5_NO_p7_12_Pin |
                                   DEK6_NO_p7_13_Pin,
                               GPIO_PIN_RESET);
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEC0_NC_P7_17_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(DEK0_NC_P7_17_GPIO_Port, DEK0_NC_P7_17_Pin, GPIO_PIN_SET);
             osDelay(10);
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEK3_NO_p7_10_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(DEK0_NC_P7_17_GPIO_Port, DEK3_NO_p7_10_Pin, GPIO_PIN_SET);
             break;
         case DEK4:
-            HAL_GPIO_WritePin(REL_NC_p5_6_GPIO_Port, REL_NC_p5_6_Pin, GPIO_PIN_SET);
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
+            HAL_GPIO_WritePin(REL_NO_DEK0_p5_6_GPIO_Port, REL_NO_DEK0_p5_6_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(DEK0_NC_P7_17_GPIO_Port,
                               DEK1_NO_p7_8_Pin | DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin | DEK5_NO_p7_12_Pin |
                                   DEK6_NO_p7_13_Pin,
                               GPIO_PIN_RESET);
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEC0_NC_P7_17_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(DEK0_NC_P7_17_GPIO_Port, DEK0_NC_P7_17_Pin, GPIO_PIN_SET);
             osDelay(10);
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEK4_NO_p7_11_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(DEK0_NC_P7_17_GPIO_Port, DEK4_NO_p7_11_Pin, GPIO_PIN_SET);
             break;
         case DEK5:
-            HAL_GPIO_WritePin(REL_NC_p5_6_GPIO_Port, REL_NC_p5_6_Pin, GPIO_PIN_SET);
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
+            HAL_GPIO_WritePin(REL_NO_DEK0_p5_6_GPIO_Port, REL_NO_DEK0_p5_6_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(DEK0_NC_P7_17_GPIO_Port,
                               DEK1_NO_p7_8_Pin | DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin | DEK4_NO_p7_11_Pin |
                                   DEK6_NO_p7_13_Pin,
                               GPIO_PIN_RESET);
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEC0_NC_P7_17_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(DEK0_NC_P7_17_GPIO_Port, DEK0_NC_P7_17_Pin, GPIO_PIN_SET);
             osDelay(10);
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEK5_NO_p7_12_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(DEK0_NC_P7_17_GPIO_Port, DEK5_NO_p7_12_Pin, GPIO_PIN_SET);
             break;
         case DEK6:
-            HAL_GPIO_WritePin(REL_NC_p5_6_GPIO_Port, REL_NC_p5_6_Pin, GPIO_PIN_SET);
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
+            HAL_GPIO_WritePin(REL_NO_DEK0_p5_6_GPIO_Port, REL_NO_DEK0_p5_6_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(DEK0_NC_P7_17_GPIO_Port,
                               DEK1_NO_p7_8_Pin | DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin | DEK4_NO_p7_11_Pin |
                                   DEK5_NO_p7_12_Pin,
                               GPIO_PIN_RESET);
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEC0_NC_P7_17_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(DEK0_NC_P7_17_GPIO_Port, DEK0_NC_P7_17_Pin, GPIO_PIN_SET);
             osDelay(10);
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEK6_NO_p7_13_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(DEK0_NC_P7_17_GPIO_Port, DEK6_NO_p7_13_Pin, GPIO_PIN_SET);
             break;
         case DEK7:
             // Intentional fallthrough
         case DEK8:
             // Intentional fallthrough
         case DEK9:
-            HAL_GPIO_WritePin(REL_NC_p5_6_GPIO_Port, REL_NC_p5_6_Pin, GPIO_PIN_SET);
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
+            HAL_GPIO_WritePin(REL_NO_DEK0_p5_6_GPIO_Port, REL_NO_DEK0_p5_6_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(DEK0_NC_P7_17_GPIO_Port,
                               DEK1_NO_p7_8_Pin | DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin | DEK4_NO_p7_11_Pin |
                                   DEK5_NO_p7_12_Pin | DEK6_NO_p7_13_Pin,
                               GPIO_PIN_RESET);
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port, DEC0_NC_P7_17_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(DEK0_NC_P7_17_GPIO_Port, DEK0_NC_P7_17_Pin, GPIO_PIN_SET);
             osDelay(10);
             break;
         case DEK0:
             // Intentional fallthrough
         default:
-            HAL_GPIO_WritePin(REL_NC_p5_6_GPIO_Port, REL_NC_p5_6_Pin, GPIO_PIN_RESET);
-            HAL_GPIO_WritePin(DEC0_NC_P7_17_GPIO_Port,
-                              DEC0_NC_P7_17_Pin | DEK1_NO_p7_8_Pin | DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin |
+            HAL_GPIO_WritePin(REL_NO_DEK0_p5_6_GPIO_Port, REL_NO_DEK0_p5_6_Pin, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(DEK0_NC_P7_17_GPIO_Port,
+                              DEK0_NC_P7_17_Pin | DEK1_NO_p7_8_Pin | DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin |
                                   DEK4_NO_p7_11_Pin | DEK5_NO_p7_12_Pin | DEK6_NO_p7_13_Pin,
                               GPIO_PIN_RESET);
             osDelay(10);
