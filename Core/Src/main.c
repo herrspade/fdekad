@@ -322,7 +322,7 @@ void StartDefaultTask(void const* argument)
         changed_pins   = curr_pin_state ^ prev_pin_state;
         if (changed_pins) {
             // De-bounce
-            osDelay(100);
+            osDelay(50);
             uint32_t tmp_pin_state = GPIOA->IDR & SWITCH_AND_INPUT_PINS;
             if (curr_pin_state == tmp_pin_state) {
                 prev_pin_state = curr_pin_state & SWITCH_AND_INPUT_PINS;
@@ -352,14 +352,14 @@ void StartDefaultTask(void const* argument)
                     } else {
                         reset_sw_pressed = true;
                     }
-                    if (changed_pins & DEK_reset_input_Pin) {
-                        reset_inp_changed = true;
-                        if (curr_pin_state & DEK_reset_input_Pin) {
-                            // low when pressed...
-                            reset_inp_high = false;
-                        } else {
-                            reset_inp_high = true;
-                        }
+                }
+                if (changed_pins & DEK_reset_input_Pin) {
+                    reset_inp_changed = true;
+                    if (curr_pin_state & DEK_reset_input_Pin) {
+                        // low when pressed...
+                        reset_inp_high = false;
+                    } else {
+                        reset_inp_high = true;
                     }
                 }
             }
