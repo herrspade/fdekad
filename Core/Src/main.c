@@ -427,7 +427,7 @@ void StartDefaultTask(void const* argument)
                               DEK2_NO_p7_9_Pin | DEK3_NO_p7_10_Pin | DEK4_NO_p7_11_Pin | DEK5_NO_p7_12_Pin |
                                   DEK6_NO_p7_13_Pin,
                               GPIO_PIN_RESET);
-            HAL_GPIO_WritePin(REL_NO_DEK0_p5_6_GPIO_Port, DEK0_NC_P7_17_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(DEK0_NC_P7_17_GPIO_Port, DEK0_NC_P7_17_Pin, GPIO_PIN_SET);
             osDelay(10);
             HAL_GPIO_WritePin(DEK0_NC_P7_17_GPIO_Port, DEK1_NO_p7_8_Pin, GPIO_PIN_SET);
             break;
