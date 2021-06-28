@@ -375,8 +375,6 @@ void StartDefaultTask(void const* argument)
         } else {
             // Check for positive flank on pulse input...
             if (pulse_inp_changed && pulse_inp_high) {
-                // Next state
-                output_state += 1;
                 // Show the change
                 HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
                 // HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
@@ -387,6 +385,8 @@ void StartDefaultTask(void const* argument)
             }
             // Check for negative flank on pulse input...
             if (pulse_inp_changed && !pulse_inp_high) {
+                // Next state
+                output_state += 1;
                 // nothing here
                 HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
             }
