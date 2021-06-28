@@ -322,7 +322,7 @@ void StartDefaultTask(void const* argument)
         changed_pins   = curr_pin_state ^ prev_pin_state;
         if (changed_pins) {
             // De-bounce
-            osDelay(50);
+            osDelay(100);
             uint32_t tmp_pin_state = GPIOA->IDR & SWITCH_AND_INPUT_PINS;
             if (curr_pin_state == tmp_pin_state) {
                 prev_pin_state = curr_pin_state & SWITCH_AND_INPUT_PINS;
@@ -364,7 +364,7 @@ void StartDefaultTask(void const* argument)
             }
         }
         if (reset_inp_high) {
-        	(void)reset_inp_changed;
+            (void) reset_inp_changed;
             // reset dekad
             if (output_state != DEK0) {
 #warning check if we can set state DEK0 directly
