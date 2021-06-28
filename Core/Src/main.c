@@ -224,7 +224,7 @@ static void MX_GPIO_Init(void)
     /*Configure GPIO pin : DEK_reset_input_Pin */
     GPIO_InitStruct.Pin  = DEK_reset_input_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
     HAL_GPIO_Init(DEK_reset_input_GPIO_Port, &GPIO_InitStruct);
 
     /*Configure GPIO pin : VCP_RX_Pin */
@@ -356,16 +356,43 @@ void StartDefaultTask(void const* argument)
                 if (changed_pins & DEK_reset_input_Pin) {
                     reset_inp_changed = true;
                     if (curr_pin_state & DEK_reset_input_Pin) {
-                        // low when pressed...
-                        reset_inp_high = false;
-                    } else {
                         reset_inp_high = true;
+                    } else {
+                        reset_inp_high = false;
                     }
                 }
             }
         }
+        if (reset_inp_high) {
+        	(void)reset_inp_changed;
+            // reset dekad
+            if (output_state != DEK0) {
+#warning check if we can set state DEK0 directly
+                // Not at DEK0, next state
+                output_state += 1;
+            }
+            osDelay(30);
+        } else {
+            // Check for positive flank on pulse input...
+            if (pulse_inp_changed && pulse_inp_high) {
+                // Next state
+                output_state += 1;
+                // Show the change
+                HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
+                // HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+            }
+            // Check if impulse has been held/pressed
+            if (!pulse_inp_changed && pulse_inp_high) {
+                // nothing here
+            }
+            // Check for negative flank on pulse input...
+            if (pulse_inp_changed && !pulse_inp_high) {
+                // nothing here
+                HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
+            }
+        }
         // Check for positive flank on pulse and manual inputs...
-        if ((manual_changed && manual_pressed) || (pulse_inp_changed && pulse_inp_high)) {
+        if (manual_changed && manual_pressed) {
             // Next state
             output_state += 1;
             // Show the change
@@ -373,20 +400,21 @@ void StartDefaultTask(void const* argument)
             // HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
         }
         // Check if impulse or manual has been held/pressed
-        if ((!manual_changed && manual_pressed) || (!pulse_inp_changed && pulse_inp_high)) {
+        if (!manual_changed && manual_pressed) {
             // nothing here
         }
         // Check for negative flank on pulse and manual inputs...
-        if ((manual_changed && !manual_pressed) || (pulse_inp_changed && !pulse_inp_high)) {
+        if (manual_changed && !manual_pressed) {
             // nothing here
             HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
         }
 
-        // Check for negative flank on pulse and manual inputs...
-        if ((reset_sw_changed && reset_sw_pressed) || (reset_inp_changed && reset_inp_high)) {
+        // Check for positive flank on manual input...
+        if (reset_sw_changed && reset_sw_pressed) {
             // close REL_NC_p5_6_Pin
             output_state = DEK0;
         }
+
         // Check for output state overflow
         if (output_state >= DEK_END) {
             output_state = DEK1;
